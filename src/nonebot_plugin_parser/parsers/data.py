@@ -8,7 +8,37 @@ from dataclasses import field, dataclass
 from collections.abc import Iterator, Awaitable
 
 from .task import PathTask
-from .utils import fmt_duration
+from .utils import fmt_count, fmt_duration
+
+# 统计项展示优先级（最多保留 6 项）
+_STAT_PRIORITY: tuple[str, ...] = (
+    "view",
+    "like",
+    "coin",
+    "favorite",
+    "reply",
+    "share",
+    "danmaku",
+)
+_MAX_DISPLAY_STATS = 6
+
+
+@dataclass(slots=True)
+class StatItem:
+    """卡片统计项"""
+
+    key: str
+    """字段键：view / like / coin / favorite / reply / share / danmaku ..."""
+    label: str
+    """展示标签：播放 / 点赞 ..."""
+    value: int | float
+    """原始数值"""
+    icon: str | None = None
+    """可选图标（emoji / 资源名），模板不强依赖"""
+
+    @property
+    def display_value(self) -> str:
+        return fmt_count(self.value)
 
 
 @dataclass(repr=False, slots=True)
@@ -119,10 +149,25 @@ class ParseResult:
 
     extra: dict[str, Any] = field(default_factory=dict)
     """额外信息"""
+    stats: list[StatItem] = field(default_factory=list)
+    """互动统计（空则不渲染统计栏）"""
+    identifier: str | None = None
+    """底部标识（如 BV 号、推文 id）"""
     repost: ParseResult | None = None
     """转发的内容"""
     render_image: Path | None = None
     """渲染图片"""
+
+    @property
+    def display_stats(self) -> list[StatItem]:
+        """按优先级过滤并截断后的有效统计项（value 为 None 的不进列表）"""
+        valid = [item for item in self.stats if item.value is not None]
+        if not valid:
+            return []
+
+        priority = {key: index for index, key in enumerate(_STAT_PRIORITY)}
+        valid.sort(key=lambda item: priority.get(item.key, len(_STAT_PRIORITY)))
+        return valid[:_MAX_DISPLAY_STATS]
 
     @property
     def header(self) -> str | None:
@@ -267,4 +312,6 @@ class ParseResultKwargs(TypedDict, total=False):
     url: str | None
     author: Author | None
     extra: dict[str, Any]
+    stats: list[StatItem]
+    identifier: str | None
     repost: ParseResult | None

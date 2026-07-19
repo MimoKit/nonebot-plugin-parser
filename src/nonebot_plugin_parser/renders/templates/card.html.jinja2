@@ -12,102 +12,73 @@
 
             :root {
               /* ── 默认配色 (fallback) ── */
-              --primary: #6366f1;
-              --grad-from: #eeeefd;
-              --grad-via: #dddefa;
-              --grad-to: #c7c8fa;
-              --accent-bg: rgba(99, 102, 241, 0.08);
+              --primary: #5b6475;
+              --accent-bg: rgba(120, 135, 160, 0.08);
 
-              /* ── 通用 token ── */
-              --card-bg: rgba(255, 255, 255, 0.60);
-              --text-primary: #1e293b;
-              --text-secondary: #64748b;
-              --repost-bg: rgba(255, 255, 255, 0.30);
-              --repost-border: rgba(255, 255, 255, 0.50);
-              --radius-card: 18px;
-              --radius-img: 12px;
-              --radius-sm: 6px;
-              --shadow-card: -2px -2px 8px rgba(0, 0, 0, 0.03), 6px 8px 24px rgba(0, 0, 0, 0.10), 12px 16px 48px rgba(0, 0, 0, 0.08);
+              /* ── 通用 token：白色磨砂玻璃 ── */
+              --card-bg: #ffffff;
+              --glass-bg: #ffffff;
+              --glass-border: rgba(255, 255, 255, 0.92);
+              --glass-shadow: 0 18px 50px rgba(40, 48, 68, 0.14), 0 4px 14px rgba(40, 48, 68, 0.07), inset 0 1px 0 rgba(255, 255, 255, 1), inset 1px 1px 10px rgba(255, 255, 255, 0.55);
+              --glass-blur: blur(28px) saturate(1.35);
+              --text-primary: #20242c;
+              --text-secondary: #727985;
+              --repost-bg: rgba(255, 255, 255, 0.42);
+              --repost-border: rgba(255, 255, 255, 0.78);
+              --radius-card: 24px;
+              --radius-img: 16px;
+              --radius-sm: 8px;
+              --shadow-card: 0 10px 30px rgba(40, 48, 68, 0.08);
             }
 
             /* ──────── 平台主题 ──────── */
             [data-platform="bilibili"] {
               --primary: #00a1d6;
-              --grad-from: #c8e4f2;
-              --grad-via: #c8ebf5;
-              --grad-to: #a8ddf0;
               --accent-bg: rgba(0, 161, 214, 0.10);
             }
 
             [data-platform="weibo"] {
               --primary: #e6162d;
-              --grad-from: #f6d4d4;
-              --grad-via: #f0b0b0;
-              --grad-to: #e88a8a;
-              --accent-bg: rgba(230, 22, 45, 0.10);
+              --accent-bg: rgba(230, 22, 45, 0.08);
             }
 
             [data-platform="xiaohongshu"] {
               --primary: #ff2442;
-              --grad-from: #fce4ec;
-              --grad-via: #f8ccda;
-              --grad-to: #f5aab8;
               --accent-bg: rgba(255, 36, 66, 0.08);
             }
 
             [data-platform="douyin"] {
               --primary: #161823;
-              --grad-from: #c8e4e3;
-              --grad-via: #a8d8d6;
-              --grad-to: #7ecac8;
               --accent-bg: rgba(37, 244, 238, 0.10);
             }
 
             [data-platform="youtube"] {
               --primary: #ff0000;
-              --grad-from: #fce6e6;
-              --grad-via: #f8d0d0;
-              --grad-to: #f5b0b0;
-              --accent-bg: rgba(255, 0, 0, 0.08);
+              --accent-bg: rgba(255, 0, 0, 0.07);
             }
 
             [data-platform="twitter"] {
               --primary: #000000;
-              --grad-from: #eeeeee;
-              --grad-via: #d8d8d8;
-              --grad-to: #c0c0c0;
-              --accent-bg: rgba(0, 0, 0, 0.06);
+              --accent-bg: rgba(0, 0, 0, 0.05);
             }
 
             [data-platform="kuaishou"] {
               --primary: #ff4906;
-              --grad-from: #fcece0;
-              --grad-via: #f8dac8;
-              --grad-to: #f5c0a0;
               --accent-bg: rgba(255, 73, 6, 0.08);
             }
 
             [data-platform="acfun"] {
               --primary: #fd4c5d;
-              --grad-from: #fce6e9;
-              --grad-via: #f8d0d5;
-              --grad-to: #f5b0b8;
               --accent-bg: rgba(253, 76, 93, 0.08);
             }
 
             [data-platform="tiktok"] {
               --primary: #010101;
-              --grad-from: #c8e4e3;
-              --grad-via: #a8d8d6;
-              --grad-to: #7ecac8;
-              --accent-bg: rgba(37, 244, 238, 0.10);
+              --accent-bg: rgba(37, 244, 238, 0.08);
             }
 
             [data-platform="nga"] {
               --primary: #816b45;
-              --grad-from: #f4f0e8;
-              --grad-via: #ebe3d4;
-              --grad-to: #e0d5c0;
               --accent-bg: rgba(129, 107, 69, 0.08);
             }
 
@@ -118,11 +89,16 @@
               padding: 0;
             }
 
+            html {
+              background: transparent !important;
+            }
+
             body {
               font-family: "CustomFont", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
               width: 800px;
-              padding: 24px;
-              background: linear-gradient(160deg, var(--grad-from) 0%, var(--grad-via) 50%, var(--grad-to) 100%);
+              padding: 28px;
+              /* 外层画布透明：聊天预览可能仍会垫底板，点开原图只保留玻璃卡片 */
+              background: transparent !important;
               display: flex;
               justify-content: center;
               align-items: flex-start;
@@ -132,17 +108,43 @@
             /* ──────── 主卡片 ──────── */
             .card {
               width: 100%;
-              background: var(--card-bg);
-              backdrop-filter: blur(40px) saturate(1.6);
-              -webkit-backdrop-filter: blur(40px) saturate(1.6);
-              border: 1.5px solid rgba(255, 255, 255, 0.55);
-              border-radius: var(--radius-card);
-              box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+              position: relative;
+              isolation: isolate;
+              background: var(--glass-bg);
+              backdrop-filter: var(--glass-blur);
+              -webkit-backdrop-filter: var(--glass-blur);
+              border: 1.5px solid var(--glass-border);
+              border-radius: 24px;
+              box-shadow: var(--glass-shadow), var(--shadow-card);
               padding: 24px;
               display: flex;
               flex-direction: column;
               gap: 14px;
               overflow: hidden;
+            }
+
+            .card::before {
+              content: "";
+              position: absolute;
+              z-index: -1;
+              inset: 0;
+              pointer-events: none;
+              border-radius: inherit;
+              background:
+                linear-gradient(120deg, rgba(255, 255, 255, 0.78), transparent 32%),
+                radial-gradient(circle at 100% 0%, var(--accent-bg), transparent 36%);
+              opacity: 0.72;
+            }
+
+            .card::after {
+              content: "";
+              position: absolute;
+              z-index: 4;
+              pointer-events: none;
+              inset: 1px;
+              border-radius: 22px;
+              border-top: 1px solid rgba(255, 255, 255, 0.92);
+              border-left: 1px solid rgba(255, 255, 255, 0.72);
             }
 
             /* ──────── Header ──────── */
@@ -197,51 +199,6 @@
               opacity: 0.8;
             }
 
-            /* ──────── 卡片包裹层 ──────── */
-            .card-wrapper {
-              position: relative;
-              width: 100%;
-            }
-
-            /* 有标签时，卡片左上角取消圆角 */
-            .card-wrapper.has-badge>.card {
-              border-top-left-radius: 0;
-            }
-
-            /* ──────── 内容类型标签（Tab 样式） ──────── */
-            .content-type-badge {
-              display: inline-flex;
-              align-items: center;
-              gap: 4px;
-              padding: 3px 10px;
-              border-radius: 8px 8px 0 0;
-              font-size: 18px;
-              font-weight: 400;
-              color: var(--primary);
-              background: var(--card-bg);
-              backdrop-filter: blur(40px) saturate(1.6);
-              -webkit-backdrop-filter: blur(40px) saturate(1.6);
-              border: 1.5px solid rgba(255, 255, 255, 0.55);
-              border-bottom: none;
-              letter-spacing: 0.03em;
-              line-height: 1.4;
-              position: relative;
-              z-index: 5;
-            }
-
-            .content-type-badge .badge-icon {
-              display: inline-flex;
-              align-items: center;
-              width: 1em;
-              height: 1em;
-            }
-
-            .content-type-badge .badge-icon svg {
-              width: 100%;
-              height: 100%;
-              fill: var(--primary);
-            }
-
             /* ──────── Content ──────── */
             .content-body {
               display: flex;
@@ -255,6 +212,10 @@
               color: var(--text-primary);
               line-height: 1.4;
               letter-spacing: -0.01em;
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 2;
+              overflow: hidden;
             }
 
             .text {
@@ -263,16 +224,20 @@
               line-height: 1.75;
               white-space: pre-wrap;
               word-wrap: break-word;
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 6;
+              overflow: hidden;
             }
 
             /* ──────── 视频封面 ──────── */
             .cover-wrapper {
               position: relative;
               width: 100%;
-              border-radius: var(--radius-img);
+              border-radius: 16px;
               overflow: hidden;
-              border: 1.5px solid rgba(255, 255, 255, 0.7);
-              box-shadow: none;
+              border: 1.5px solid rgba(255, 255, 255, 0.92);
+              box-shadow: 0 10px 28px rgba(40, 48, 68, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.75);
             }
 
             .cover-wrapper img.cover-img {
@@ -303,32 +268,6 @@
               font-size: 13px;
               font-weight: 600;
               font-variant-numeric: tabular-nums;
-            }
-
-            /* ──────── 播放按钮 ──────── */
-            .play-button {
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 72px;
-              height: 72px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background: rgba(255, 255, 255, 0.25);
-              border: 1.5px solid rgba(255, 255, 255, 0.4);
-              border-radius: 50%;
-              pointer-events: none;
-              backdrop-filter: blur(12px);
-              box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            }
-
-            .play-button img {
-              width: 100%;
-              height: 100%;
-              object-fit: contain;
-              opacity: 0.5;
             }
 
             /* ──────── 图片网格 ──────── */
@@ -419,8 +358,10 @@
               flex-direction: column;
               gap: 8px;
               padding: 14px;
-              background: var(--accent-bg);
-              border-radius: var(--radius-img);
+              background: linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.38));
+              border: 1px solid rgba(255, 255, 255, 0.84);
+              border-radius: 16px;
+              box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
             }
 
             .graphics-alt {
@@ -432,19 +373,21 @@
 
             /* ──────── 转发 / Repost ──────── */
             .card.repost {
-              background: linear-gradient(135deg,
-                  var(--accent-bg) 0%,
-                  rgba(255, 255, 255, 0.35) 50%,
-                  var(--accent-bg) 100%);
-              backdrop-filter: blur(32px) saturate(1.5);
-              -webkit-backdrop-filter: blur(32px) saturate(1.5);
-              box-shadow: -1px -1px 4px rgba(0, 0, 0, 0.02), 4px 6px 16px rgba(0, 0, 0, 0.08), 8px 10px 32px rgba(0, 0, 0, 0.06);
-              border: none;
+              background: linear-gradient(145deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.36));
+              backdrop-filter: blur(22px) saturate(1.25);
+              -webkit-backdrop-filter: blur(22px) saturate(1.25);
+              box-shadow: 0 8px 24px rgba(40, 48, 68, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+              border: 1px solid rgba(255, 255, 255, 0.78);
               border-left: 3.5px solid var(--primary);
-              border-radius: var(--radius-img);
+              border-radius: 16px;
               padding: 18px;
               gap: 12px;
               overflow: hidden;
+            }
+
+            .card.repost::before,
+            .card.repost::after {
+              display: none;
             }
 
             .card.repost .avatar {
@@ -470,14 +413,73 @@
               line-height: 1.7;
             }
 
+            /* ──────── 统计与来源 ──────── */
+            .stats {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+              gap: 8px;
+              padding-top: 2px;
+            }
+
+            .stat-item {
+              min-width: 0;
+              padding: 10px 6px 9px;
+              border: 1px solid rgba(255, 255, 255, 0.9);
+              border-radius: 14px;
+              background: linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.42));
+              box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 6px 16px rgba(40, 48, 68, 0.07);
+              backdrop-filter: blur(14px);
+              -webkit-backdrop-filter: blur(14px);
+              text-align: center;
+            }
+
+            .stat-value {
+              color: var(--text-primary);
+              font-size: 17px;
+              font-weight: 700;
+              line-height: 1.25;
+              font-variant-numeric: tabular-nums;
+            }
+
+            .stat-label {
+              margin-top: 3px;
+              color: var(--text-secondary);
+              font-size: 12px;
+              line-height: 1.2;
+            }
+
+            .footer {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+              padding-top: 2px;
+              color: var(--text-secondary);
+              font-size: 12px;
+              line-height: 1.4;
+            }
+
+            .footer-id {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .footer-platform {
+              flex-shrink: 0;
+              color: var(--primary);
+              font-weight: 600;
+            }
+
             /* ──────── AI 总结面板 ──────── */
             .ai-summary {
               padding: 14px 18px;
-              border-radius: var(--radius-img);
-              background: var(--accent-bg);
-              backdrop-filter: blur(12px);
-              -webkit-backdrop-filter: blur(12px);
-              border: 1px solid rgba(255, 255, 255, 0.25);
+              border-radius: 16px;
+              background: linear-gradient(145deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.42));
+              backdrop-filter: blur(16px);
+              -webkit-backdrop-filter: blur(16px);
+              border: 1px solid rgba(255, 255, 255, 0.86);
+              box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 18px rgba(40, 48, 68, 0.06);
               display: flex;
               flex-direction: column;
               gap: 8px;
@@ -511,131 +513,120 @@
         {% autoescape true %}
             {% macro render_card(result, is_repost=False) %}
                 {% set content_type = result.content_type %}
-                <div class="{% if not is_repost %}card-wrapper{% if content_type %} has-badge{% endif %}{% endif %}">
-                    {% if not is_repost and result.content_type %}
-                        <span class="content-type-badge">
-                            <span class="badge-icon">
-                                {% if content_type == '视频' %}
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v12h16V6H4zm6 2.5l6 3.5-6 3.5v-7z" />
-                                    </svg>
-                                {% elif content_type == '图文' %}
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h16V5H4zm2 2h5v5H6V7zm7 0h5v2h-5V7zm0 4h5v2h-5v-2zM6 14h12v2H6v-2z" />
-                                    </svg>
-                                {% else %}
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h6v2H7v-2z" />
-                                    </svg>
-                                {% endif %}
-                            </span>
-                            {{ content_type }}
-                        </span>
+                <div class="card {% if is_repost %}repost{% endif %}">
+                    {# ── Header ── #}
+                    {% set author = result.author %}
+                    {% if author %}
+                        <div class="header">
+                            {% set avatar_uri = (author.avatar.file_uri if (author.avatar and author.avatar.file_uri) else default_avatar) %}
+                            <img src="{{ avatar_uri | safe }}" class="avatar" alt="avatar" />
+                            <div class="user-info">
+                                <div class="username">{{ author.name }}</div>
+                                {% if result.formartted_datetime %}<div class="time">{{ result.formartted_datetime }}</div>{% endif %}
+                            </div>
+                            {% if not is_repost and result.platform and logo %}
+                                <img src="{{ logo | safe }}"
+                                     class="platform-logo"
+                                     alt="{{ result.platform.display_name }}" />
+                            {% endif %}
+                        </div>
                     {% endif %}
-                    <div class="card {% if is_repost %}repost{% endif %}">
-                        {# ── Header ── #}
-                        {% set author = result.author %}
-                        {% if author %}
-                            <div class="header">
-                                {% set avatar_uri = author.avatar.uri if (author.avatar and author.avatar.uri) else default_avatar %}
-                                <img src="{{ avatar_uri | safe }}" class="avatar" alt="avatar" />
-                                <div class="user-info">
-                                    <div class="username">{{ author.name }}</div>
-                                    {% if result.formartted_datetime %}<div class="time">{{ result.formartted_datetime }}</div>{% endif %}
-                                </div>
-                                {% if not is_repost and result.platform and logo %}
-                                    <img src="{{ logo | safe }}"
-                                         class="platform-logo"
-                                         alt="{{ result.platform.display_name }}" />
+                    <div class="content-body">
+                        {# ── Title（非视频：标题属于动态本身，放在封面上方） ── #}
+                        {% if result.title and not result.video %}<div class="title">{{ result.title }}</div>{% endif %}
+                        {# ── 动态类型：文字显示在封面上方 ── #}
+                        {% if content_type == '动态' and result.text %}<div class="text">{{ result.text }}</div>{% endif %}
+                        {# ── 视频封面 ── #}
+                        {% set video = result.video %}
+                        {% if video and video.cover %}
+                            {% set cover_uri = (video.cover.file_uri if (video.cover and video.cover.file_uri) else fallback_pic) %}
+                            <div class="cover-wrapper">
+                                <img src="{{ cover_uri | safe }}" class="cover-img" alt="cover" />
+                                {% if video.duration %}
+                                    <div class="cover-overlay">
+                                        <div class="duration-badge">{{ video.display_duration }}</div>
+                                    </div>
                                 {% endif %}
                             </div>
                         {% endif %}
-                        <div class="content-body">
-                            {# ── Title（非视频：标题属于动态本身，放在封面上方） ── #}
-                            {% if result.title and not result.video %}<div class="title">{{ result.title }}</div>{% endif %}
-                            {# ── 动态类型：文字显示在封面上方 ── #}
-                            {% if content_type == '动态' and result.text %}<div class="text">{{ result.text }}</div>{% endif %}
-                            {# ── 视频封面 ── #}
-                            {% set video = result.video %}
-                            {% if video and video.cover %}
-                                {% set cover_uri = (video.cover.uri if video.cover.uri else fallback_pic) %}
-                                <div class="cover-wrapper">
-                                    <img src="{{ cover_uri | safe }}" class="cover-img" alt="cover" />
-                                    {% if play_button %}
-                                        <div class="play-button">
-                                            <img src="{{ play_button | safe }}" alt="play" />
+                        {# ── Title（有视频：标题属于视频，放在封面下方） ── #}
+                        {% if result.title and result.video %}<div class="title">{{ result.title }}</div>{% endif %}
+                        {# ── Text（非动态类型） ── #}
+                        {% if content_type != '动态' and result.text %}<div class="text">{{ result.text }}</div>{% endif %}
+
+                        {% set imgs = result.all_grid_images %}
+                        {% if video %}
+                            {# 如果有视频，则不显示图片网格 #}
+                        {# ── Image Grid ── #}
+                        {% elif imgs %}
+                            {% set count = imgs|length %}
+                            {% if count == 1 %}
+                                {% set img = imgs[0] %}
+                                <div class="image-container">
+                                    <img src="{{ (img.file_uri if img.file_uri else fallback_pic) | safe }}"
+                                          class="single-image"
+                                          alt="image" />
+                                </div>
+                            {% else %}
+                                {% set cols = 2 if count in [2, 4] else 3 %}
+                                <div class="image-grid cols-{{ cols }}">
+                                    {% for img in imgs[:9] %}
+                                        {% set img_uri = (img.file_uri if img.file_uri else fallback_pic) %}
+                                        <div class="grid-item">
+                                            <img src="{{ img_uri | safe }}" alt="image" />
+                                            {% if loop.last and count > 9 %}
+                                                <div class="more-count">+{{ count - 9 }}</div>
+                                            {% endif %}
                                         </div>
-                                    {% endif %}
-                                    {% if video.duration %}
-                                        <div class="cover-overlay">
-                                            <div class="duration-badge">{{ video.display_duration }}</div>
-                                        </div>
-                                    {% endif %}
+                                    {% endfor %}
                                 </div>
                             {% endif %}
-                            {# ── Title（有视频：标题属于视频，放在封面下方） ── #}
-                            {% if result.title and result.video %}<div class="title">{{ result.title }}</div>{% endif %}
-                            {# ── Text（非动态类型） ── #}
-                            {% if content_type != '动态' and result.text %}<div class="text">{{ result.text }}</div>{% endif %}
-            
-                            {% set imgs = result.all_grid_images %}
-                            {% if video%}
-                                {# 如果有视频，则不显示图片网格 #}
-                            {# ── Image Grid ── #}
-                            {% elif imgs %}
-                                {% set count = imgs|length %}
-                                {% if count == 1 %}
-                                    {% set img = imgs[0] %}
-                                    <div class="image-container">
-                                        <img src="{{ img.uri | safe }}"
-                                              class="single-image"
-                                              alt="image" />
-                                    </div>
-                                {% else %}
-                                    {% set cols = 2 if count in [2, 4] else 3 %}
-                                    <div class="image-grid cols-{{ cols }}">
-                                        {% for img in imgs[:9] %}
-                                            {% set img_uri = (img.uri if img.uri else fallback_pic) %}
-                                            <div class="grid-item">
-                                                <img src="{{ img_uri | safe }}" alt="image" />
-                                                {% if loop.last and count > 9 %}
-                                                    <div class="more-count">+{{ count - 9 }}</div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            {# ── Graphics ── #}
-                            {% elif result.graphics %}
-                                {% for text_or_img in result.graphics %}
-                                    <div class="graphics-item">
-                                        {% if text_or_img is string %}
-                                            <div class="text">{{ text_or_img }}</div>
-                                        {% else %}
-                                            {% set img_uri = text_or_img.path_task.uri %}
-                                            {% set img_uri = (img_uri if img_uri else fallback_pic) %}
-                                            <div class="image-container">
-                                                <img src="{{ img_uri | safe }}"
-                                                      class="single-image"
-                                                      alt="graphics" />
-                                            </div>
-                                        {% endif %}
-                                        {% if text_or_img.alt %}<div class="graphics-alt">{{ text_or_img.alt }}</div>{% endif %}
+                        {# ── Graphics ── #}
+                        {% elif result.graphics %}
+                            {% for text_or_img in result.graphics %}
+                                <div class="graphics-item">
+                                    {% if text_or_img is string %}
+                                        <div class="text">{{ text_or_img }}</div>
+                                    {% else %}
+                                        {% set img_uri = text_or_img.path_task.file_uri %}
+                                        {% set img_uri = (img_uri if img_uri else fallback_pic) %}
+                                        <div class="image-container">
+                                            <img src="{{ img_uri | safe }}"
+                                                  class="single-image"
+                                                  alt="graphics" />
+                                        </div>
+                                    {% endif %}
+                                    {% if text_or_img.alt %}<div class="graphics-alt">{{ text_or_img.alt }}</div>{% endif %}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        {% if not is_repost and result.display_stats %}
+                            <div class="stats">
+                                {% for stat in result.display_stats %}
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ stat.display_value }}</div>
+                                        <div class="stat-label">{% if stat.icon %}{{ stat.icon }} {% endif %}{{ stat.label }}</div>
                                     </div>
                                 {% endfor %}
-                            {% endif %}
-                            {# ── Repost ── #}
-                            {% if result.repost %}{{ render_card(result.repost, is_repost=True) }}{% endif %}
-                        </div>
-                        {# ── AI 总结 ── #}
-                        {% if not is_repost and result.extra_info %}
-                            <div class="ai-summary">
-                                <div class="ai-summary-label">AI 总结</div>
-                                <div class="ai-summary-text">{{ result.extra_info }}</div>
                             </div>
                         {% endif %}
+                        {# ── Repost ── #}
+                        {% if result.repost %}{{ render_card(result.repost, is_repost=True) }}{% endif %}
                     </div>
-                    {% if not is_repost %}</div>{% endif %}
+                    {# ── AI 总结 ── #}
+                    {% if not is_repost and result.extra_info %}
+                        <div class="ai-summary">
+                            <div class="ai-summary-label">AI 总结</div>
+                            <div class="ai-summary-text">{{ result.extra_info }}</div>
+                        </div>
+                    {% endif %}
+                    {% if not is_repost and (result.identifier or result.platform) %}
+                        <div class="footer">
+                            <span class="footer-id">{% if result.identifier %}{{ result.identifier }}{% endif %}</span>
+                            {% if result.platform %}<span class="footer-platform">{{ result.platform.display_name }}</span>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
             {% endmacro %}
             {{ render_card(result) }}
         {% endautoescape %}

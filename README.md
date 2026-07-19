@@ -40,7 +40,7 @@
 
 ## 🎨 效果图
 
-插件默认启用 PIL 实现的通用媒体卡片渲染，效果图如下
+插件默认启用基于 HTML/CSS 的通用媒体玻璃卡片渲染：使用平台主题渐变、圆角封面、互动统计与来源信息。请安装 `nonebot-plugin-parser[htmlrender]`，并按 `nonebot-plugin-htmlrender` 文档准备 Chromium；依赖不可用时会自动回退到 PIL 通用卡片。效果图如下
 
 <div align="center">
 
@@ -62,6 +62,12 @@
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
     nb plugin install nonebot-plugin-parser --upgrade
+
+默认卡片为 HTML 玻璃渲染，建议安装完整依赖：
+
+    nb plugin install "nonebot-plugin-parser[htmlrender]" --upgrade
+
+并按 `nonebot-plugin-htmlrender` 文档准备 Chromium。未安装时会自动回退到 PIL 卡片。
 
 使用 pypi 源更新
 
@@ -239,8 +245,9 @@ parser_max_size=90
 parser_disabled_platforms='["twitter"]'
 
 # [可选] 渲染器类型
-# 可选 "default"(无图片渲染), "common"(PIL 通用图片渲染), "htmlrender"(htmlrender), "htmlkit"(htmlkit, 暂不可用)
-parser_render_type="common"
+# 可选 "default"(无图片渲染), "common"(PIL 通用图片渲染), "htmlrender"(默认，HTML 玻璃卡片), "htmlkit"(暂不可用)
+# htmlrender 需要安装 nonebot-plugin-parser[htmlrender] 并准备 Chromium；不可用时自动回退 common
+parser_render_type="htmlrender"
 
 # [可选] 是否在解析结果中附加原始URL
 parser_append_url=False

@@ -20,7 +20,7 @@ from ..base import (
     handle,
     pconfig,
 )
-from ..data import Platform, ImageContent, MediaContent
+from ..data import Platform, ImageContent, MediaContent, StatItem
 from ..cookie import ck2dict
 from .dynamic import DynamicInfo
 
@@ -154,6 +154,7 @@ class BilibiliParser(BaseParser):
             page_info.duration,
         )
 
+        stat = video_info.stat
         return self.result(
             url=url,
             title=page_info.title,
@@ -162,6 +163,16 @@ class BilibiliParser(BaseParser):
             author=author,
             contents=[video_content],
             extra={"info": ai_summary},
+            identifier=video_info.bvid,
+            stats=[
+                StatItem("view", "播放", stat.view),
+                StatItem("like", "点赞", stat.like),
+                StatItem("coin", "投币", stat.coin),
+                StatItem("favorite", "收藏", stat.favorite),
+                StatItem("reply", "评论", stat.reply),
+                StatItem("share", "分享", stat.share),
+                StatItem("danmaku", "弹幕", stat.danmaku),
+            ],
         )
 
     async def parse_dynamic_or_opus(self, dynamic_id: int):

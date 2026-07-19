@@ -12,6 +12,8 @@ from . import assets
 from .. import resources
 from .font import StyledFont, FontMetrics
 from ..base import ParseResult, ImageContent, ImageRenderer
+from ...config import pconfig
+from ...parsers.utils import fmt_count
 
 Color = tuple[int, int, int]
 PILImage = Image.Image
@@ -53,6 +55,18 @@ class CommonRenderer(ImageRenderer):
     BG_COLOR: ClassVar[Color] = (255, 255, 255)
     REPOST_BG_COLOR: ClassVar[Color] = (247, 247, 247)
     REPOST_BORDER_COLOR: ClassVar[Color] = (230, 230, 230)
+    PLATFORM_COLORS: ClassVar[dict[str, tuple[Color, Color]]] = {
+        "bilibili": ((248, 249, 251), (238, 241, 245)),
+        "weibo": ((249, 248, 248), (244, 239, 239)),
+        "xiaohongshu": ((250, 248, 249), (245, 239, 241)),
+        "douyin": ((247, 249, 249), (236, 242, 242)),
+        "youtube": ((250, 248, 248), (245, 239, 239)),
+        "twitter": ((248, 248, 248), (238, 238, 238)),
+        "kuaishou": ((250, 249, 247), (245, 241, 237)),
+        "acfun": ((250, 248, 248), (245, 239, 241)),
+        "tiktok": ((247, 249, 249), (236, 242, 242)),
+        "nga": ((249, 248, 246), (242, 239, 234)),
+    }
 
     def __init__(self, result: ParseResult, not_repost: bool = True):
         super().__init__(result, not_repost)
@@ -74,6 +88,8 @@ class CommonRenderer(ImageRenderer):
     @override
     async def render_image(self) -> bytes:
         image = await self._render_image()
+        if image.mode != "RGBA":
+            image = image.convert("RGBA")
         output = BytesIO()
         image.save(output, format="PNG")
         return output.getvalue()
@@ -81,18 +97,22 @@ class CommonRenderer(ImageRenderer):
     async def _render_image(self) -> PILImage:
         """渲染图片 (内部方法)"""
         estimated_height = self._estimate_height()
-        bg_color = self.BG_COLOR if self.not_repost else self.REPOST_BG_COLOR
-
-        self._image = Image.new("RGB", (self.card_width, estimated_height), bg_color)
+        self._image = self._create_canvas(estimated_height)
         self._draw = ImageDraw.Draw(self._image)
 
         # 单次遍历渲染各部分
         await self._render_header()
-        await self._render_title()
-        await self._render_main_content()
+        if self.result.video:
+            await self._render_main_content()
+            await self._render_title()
+        else:
+            await self._render_title()
+            await self._render_main_content()
         await self._render_text()
+        await self._render_stats()
         await self._render_extra()
         await self._render_repost()
+        await self._render_footer()
 
         # 裁剪到实际高度
         final_height = self.y_pos + self.PADDING
@@ -151,6 +171,10 @@ class CommonRenderer(ImageRenderer):
             )
             height += self.SECTION_SPACING
 
+        # 统计
+        if self.not_repost and self.result.display_stats:
+            height += 56 + self.SECTION_SPACING
+
         # 额外信息
         if self.result.extra_info:
             height += self._estimate_text_height(
@@ -165,7 +189,27 @@ class CommonRenderer(ImageRenderer):
             height += int(self.repost_renderer._estimate_height() * self.REPOST_SCALE)
             height += self.REPOST_PADDING * 2 + self.SECTION_SPACING
 
+        # 页脚
+        if self.not_repost and (self.result.identifier or self.result.platform):
+            height += assets.FONTS.muted.metrics.line_height + self.SECTION_SPACING
+
         return height
+
+    def _create_canvas(self, height: int) -> PILImage:
+        """创建透明外层 + 白色玻璃卡片画布"""
+        if not self.not_repost:
+            return Image.new("RGBA", (self.card_width, height), (*self.REPOST_BG_COLOR, 230))
+
+        # 外层透明，仅保留卡片本体；聊天预览可能垫底，点开原图无底板
+        canvas = Image.new("RGBA", (self.card_width, height), (0, 0, 0, 0))
+        ImageDraw.Draw(canvas).rounded_rectangle(
+            (12, 12, self.card_width - 12, height - 12),
+            radius=22,
+            fill=(255, 255, 255, 255),
+            outline=(255, 255, 255, 235),
+            width=2,
+        )
+        return canvas
 
     async def _render_header(self) -> None:
         """渲染头部（头像 + 名称 + 时间）"""
@@ -304,15 +348,6 @@ class CommonRenderer(ImageRenderer):
                     (content_width, new_h),
                     Image.Resampling.LANCZOS,
                 )
-
-            # 视频播放按钮
-            btn_size = 100
-            btn_x, btn_y = (img.width - btn_size) // 2, (img.height - btn_size) // 2
-            img.paste(
-                assets.VIDEO_BUTTON_IMAGE,
-                (btn_x, btn_y),
-                assets.VIDEO_BUTTON_IMAGE,
-            )
 
             # 视频时长
             # display_duration = video_content.display_duration
@@ -525,6 +560,79 @@ class CommonRenderer(ImageRenderer):
             assets.FONTS.muted.metrics,
         )
         self.y_pos += await self._draw_text(lines, assets.FONTS.muted)
+
+    async def _render_stats(self) -> None:
+        """渲染统计分栏"""
+        if not self.not_repost:
+            return
+
+        stats = self.result.display_stats
+        if not stats:
+            return
+
+        cols = len(stats)
+        gap = 8
+        box_h = 52
+        box_w = (self.content_width - gap * (cols - 1)) // cols
+        value_font = ImageFont.truetype(pconfig.custom_font or resources.DEFAULT_FONT_PATH, 18)
+        label_font = ImageFont.truetype(pconfig.custom_font or resources.DEFAULT_FONT_PATH, 14)
+        x = self.PADDING
+
+        for stat in stats:
+            self._draw.rounded_rectangle(
+                (x, self.y_pos, x + box_w, self.y_pos + box_h),
+                radius=10,
+                fill=(255, 255, 255),
+                outline=(230, 230, 230),
+            )
+            value = fmt_count(stat.value)
+            value_box = value_font.getbbox(value)
+            label_box = label_font.getbbox(stat.label)
+            value_w = value_box[2] - value_box[0]
+            label_w = label_box[2] - label_box[0]
+            self._draw.text(
+                (x + (box_w - value_w) // 2, self.y_pos + 6),
+                value,
+                font=value_font,
+                fill=assets.FONTS.body.fill,
+            )
+            self._draw.text(
+                (x + (box_w - label_w) // 2, self.y_pos + 30),
+                stat.label,
+                font=label_font,
+                fill=assets.FONTS.muted.fill,
+            )
+            x += box_w + gap
+
+        self.y_pos += box_h + self.SECTION_SPACING
+
+    async def _render_footer(self) -> None:
+        """渲染底部来源标识"""
+        if not self.not_repost:
+            return
+
+        left = self.result.identifier
+        right = self.result.platform.display_name if self.result.platform else ""
+        if not left and not right:
+            return
+
+        paint = assets.FONTS.muted
+        if left:
+            self._draw.text(
+                (self.PADDING, self.y_pos),
+                left,
+                font=paint.metrics.font,
+                fill=paint.fill,
+            )
+        if right:
+            right_w = paint.metrics.get_text_width(right)
+            self._draw.text(
+                (self.card_width - self.PADDING - right_w, self.y_pos),
+                right,
+                font=paint.metrics.font,
+                fill=assets.FONTS.name.fill,
+            )
+        self.y_pos += paint.metrics.line_height + self.SECTION_SPACING
 
     async def _render_repost(self) -> None:
         """渲染转发内容"""

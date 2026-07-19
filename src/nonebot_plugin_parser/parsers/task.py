@@ -46,6 +46,11 @@ class PathTask:
         path = await self.safe_get()
         return path.as_uri() if path else None
 
+    @property
+    def file_uri(self) -> str | None:
+        """同步读取已下载路径的 file URI（需先 ensure_downloads / get）"""
+        return self._path.as_uri() if self._path is not None else None
+
     def __repr__(self) -> str:
         if self._path is not None:
             return f"PathTask(path={self._path.name})"

@@ -18,6 +18,7 @@ from .base import handle
 from .data import (
     Author,
     Platform,
+    StatItem,
     ParseResult,
     AudioContent,
     ImageContent,
@@ -31,6 +32,7 @@ __all__ = [
     "ImageContent",
     "ParseResult",
     "Platform",
+    "StatItem",
     "VideoContent",
     "handle",
 ]
