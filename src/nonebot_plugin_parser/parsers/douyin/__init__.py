@@ -33,12 +33,21 @@ class DouyinParser(BaseParser):
     @handle("jingxuan.douyin", r"jingxuan\.douyin.com/m/(?P<ty>slides|video|note)/(?P<vid>\d+)")
     async def _parse_douyin(self, searched: re.Match[str]):
         ty, vid = searched.group("ty"), searched.group("vid")
+
+        # slides 动态图同样需要详情接口中的 images[].video；旧 slides 接口可能只返回静态图片。
+        try:
+            from .detail import fetch_aweme_detail
+
+            return self._parse_detail(await fetch_aweme_detail(vid))
+        except Exception as e:
+            logger.warning(f"failed to parse detail API for {vid}, falling back to legacy parser: {e}")
+
         if ty == "slides":
             return await self.parse_slides(vid)
 
         for url in (self._build_m_douyin_url(ty, vid), self._build_iesdouyin_url(ty, vid)):
             try:
-                return await self.parse_video(url, video_id=vid)
+                return await self.parse_video(url)
             except ParseException as e:
                 logger.warning(f"failed to parse {url}, error: {e}")
                 continue
