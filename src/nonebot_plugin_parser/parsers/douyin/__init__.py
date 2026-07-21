@@ -1,5 +1,5 @@
 import re
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from httpx import AsyncClient
 from nonebot import logger
@@ -38,7 +38,7 @@ class DouyinParser(BaseParser):
 
         for url in (self._build_m_douyin_url(ty, vid), self._build_iesdouyin_url(ty, vid)):
             try:
-                return await self.parse_video(url)
+                return await self.parse_video(url, video_id=vid)
             except ParseException as e:
                 logger.warning(f"failed to parse {url}, error: {e}")
                 continue
@@ -52,8 +52,97 @@ class DouyinParser(BaseParser):
     def _build_m_douyin_url(ty: str, vid: str) -> str:
         return f"https://m.douyin.com/share/{ty}/{vid}"
 
-    async def parse_video(self, url: str):
+    @staticmethod
+    def _first_url(value: Any) -> str | None:
+        """从抖音返回的 url_list/urlList 结构中取第一条有效地址。"""
+        if isinstance(value, str):
+            return value or None
+        if isinstance(value, dict):
+            for key in ("url_list", "urlList", "url"):
+                if result := DouyinParser._first_url(value.get(key)):
+                    return result
+        if isinstance(value, (list, tuple)):
+            for item in value:
+                if result := DouyinParser._first_url(item):
+                    return result
+        return None
+
+    @staticmethod
+    def _is_video_url(url: str | None) -> bool:
+        if not url:
+            return False
+        lowered = url.lower()
+        return not any(
+            marker in lowered
+            for marker in (".mp3", ".m4a", ".aac", "ies-music", "audio/", "mime_type=audio")
+        )
+
+    @staticmethod
+    def _duration_seconds(video: dict[str, Any] | None) -> float | None:
+        if not video:
+            return None
+        duration = video.get("duration")
+        if not isinstance(duration, (int, float)) or duration <= 0:
+            return None
+        return duration / 1000 if duration > 1000 else float(duration)
+
+    def _parse_detail(self, detail: dict[str, Any]):
+        author_data = detail.get("author") or {}
+        avatar_url = self._first_url(
+            author_data.get("avatar_thumb") or author_data.get("avatar_medium") or author_data.get("avatar_larger")
+        )
+        author = self.create_author(str(author_data.get("nickname") or "未知用户"), avatar_url)
+        result = self.result(
+            title=detail.get("desc") or detail.get("title"),
+            author=author,
+            timestamp=detail.get("create_time"),
+        )
+
+        image_urls: list[str] = []
+        dynamic_urls: list[tuple[str, dict[str, Any]]] = []
+        for image in detail.get("images") or []:
+            if not isinstance(image, dict):
+                continue
+            if image_url := self._first_url(image.get("url_list") or image.get("urlList")):
+                image_urls.append(image_url)
+            image_video = image.get("video")
+            if isinstance(image_video, dict):
+                video_url = self._first_url((image_video.get("play_addr") or {}).get("url_list"))
+                if self._is_video_url(video_url):
+                    dynamic_urls.append((video_url, image_video))
+
+        top_video = detail.get("video")
+        if isinstance(top_video, dict):
+            top_video_url = self._first_url((top_video.get("play_addr") or {}).get("url_list"))
+            if self._is_video_url(top_video_url) and not any(url == top_video_url for url, _ in dynamic_urls):
+                dynamic_urls.append((top_video_url, top_video))
+
+        if dynamic_urls:
+            # 动态图先发一张静态封面，再发送原始动态视频；不再转 GIF，也不额外合并音乐。
+            if image_urls:
+                result.contents.extend(self.create_images([image_urls[0]]))
+            for video_url, video_data in dynamic_urls:
+                cover_url = self._first_url((video_data.get("cover") or {}).get("url_list"))
+                result.contents.append(
+                    self.create_video(
+                        video_url.replace("playwm", "play"), cover_url, self._duration_seconds(video_data)
+                    )
+                )
+        elif image_urls:
+            result.contents.extend(self.create_images(image_urls))
+
+        return result
+
+    async def parse_video(self, url: str, video_id: str | None = None):
         from . import video
+
+        if video_id:
+            try:
+                from .detail import fetch_aweme_detail
+
+                return self._parse_detail(await fetch_aweme_detail(video_id))
+            except Exception as e:
+                logger.warning(f"failed to parse detail API for {video_id}, falling back to page: {e}")
 
         async with AsyncClient(
             headers=self.ios_headers,
@@ -129,8 +218,10 @@ class DouyinParser(BaseParser):
 
         # 优先取动图
         if dynamic_urls := slides_data.dynamic_urls:
+            if image_urls := slides_data.image_urls:
+                result.contents.extend(self.create_images([image_urls[0]]))
             for dynamic_url in dynamic_urls:
-                result.contents.append(self.create_gif(dynamic_url))
+                result.contents.append(self.create_video(dynamic_url))
         elif image_urls := slides_data.image_urls:
             result.contents.extend(self.create_images(image_urls))
 

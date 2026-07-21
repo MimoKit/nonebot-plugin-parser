@@ -43,6 +43,12 @@ class BaseRenderer(ABC):
                 nonlocal failed_count
                 failed_count += 1
 
+        async def flush_mergeable() -> AsyncGenerator[UniMessage[Any], None]:
+            """先发送已收集的图片，保证图片在后续视频之前到达。"""
+            while mergeable_segs:
+                seg = mergeable_segs.pop(0)
+                yield seg if isinstance(seg, UniMessage) else UniMessage(seg)
+
         for cont in chain(
             self.result.contents,
             self.result.repost.contents if self.result.repost else (),
@@ -53,6 +59,8 @@ class BaseRenderer(ABC):
 
             match cont:
                 case VideoContent() as video:
+                    async for message in flush_mergeable():
+                        yield message
                     if video.gif_path and (gif_path := await video.gif_path.safe_get()):
                         mergeable_segs.append(UniHelper.img_seg(gif_path))
                     else:
